@@ -14,7 +14,7 @@
             <Label 
                 Text="Broker:"
                 SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"/>
+                FontSize="24"/>
             
             <HorizontalStackLayout
                 Spacing="10"
@@ -23,13 +23,12 @@
                 <Label 
                     Text="IP:"
                     SemanticProperties.HeadingLevel="Level2"
-                    FontSize="20"/>
+                    FontSize="16"/>
                 <Entry
                     x:Name="IpEntry"
                     Placeholder="192.168.0.1"
-                    Keyboard="Numeric"
-                    FontSize="20"
-                    Margin="0,-8"
+                    FontSize="16"
+                    Margin="0,-10"
                     WidthRequest="265"/>
 
             </HorizontalStackLayout>
@@ -41,54 +40,87 @@
                 <Label 
                     Text="Port:"
                     SemanticProperties.HeadingLevel="Level2"
-                    FontSize="20"/>
+                    FontSize="16"/>
                 <Entry
                     x:Name="PortEntry"
                     Placeholder="1883"
                     Keyboard="Numeric"
-                    FontSize="20"
-                    Margin="0,-8"
-                    WidthRequest="243"/>
+                    FontSize="16"
+                    Margin="0,-10"
+                    WidthRequest="248"/>
 
             </HorizontalStackLayout>
 
             <Label 
-                Text="Client:"
+                Text="Connection:"
                 SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"/>
+                FontSize="24"/>
+
+            <HorizontalStackLayout
+                Spacing="10"
+                Padding="30,0">
+
+                <Switch
+                    x:Name="TlsSwitch"/>
+                <Label 
+                    Text="Use TLS Encryption"
+                    SemanticProperties.HeadingLevel="Level2"
+                    FontSize="16"
+                    Margin="0,12"/>
+
+            </HorizontalStackLayout>
             
             <HorizontalStackLayout
+                Spacing="10"
+                Padding="30,0">
+
+                <Switch
+                    x:Name="CredentialsSwitch"
+                    Toggled="CredentialsSwitch_Toggled"/>
+                <Label 
+                    Text="Use Credentials"
+                    SemanticProperties.HeadingLevel="Level2"
+                    FontSize="16"
+                    Margin="0,12"/>
+
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout
+                x:Name="UsernameLine"
+                IsVisible="false"
                 Spacing="10"
                 Padding="30,0">
 
                 <Label 
                     Text="Username:"
                     SemanticProperties.HeadingLevel="Level2"
-                    FontSize="20"/>
+                    FontSize="16"/>
                 <Entry
                     x:Name="UsernameEntry"
                     Placeholder="username"
-                    FontSize="20"
-                    Margin="0,-8"
-                    WidthRequest="185"/>
+                    FontSize="16"
+                    Margin="0,-10"
+                    WidthRequest="200"/>
 
             </HorizontalStackLayout>
 
             <HorizontalStackLayout
+                x:Name="PasswordLine"
+                IsVisible="false"
                 Spacing="10"
                 Padding="30,0">
 
                 <Label 
                     Text="Password:"
                     SemanticProperties.HeadingLevel="Level2"
-                    FontSize="20"/>
+                    FontSize="16"/>
                 <Entry
                     x:Name="PasswordEntry"
                     Placeholder="password"
                     IsPassword="True"
-                    FontSize="20"
-                    Margin="0,-8"
-                    WidthRequest="191"/>
+                    FontSize="16"
+                    Margin="0,-10"
+                    WidthRequest="205"/>
 
             </HorizontalStackLayout>
 
