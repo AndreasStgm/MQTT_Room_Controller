@@ -32,6 +32,12 @@ build_metadata.AdditionalFiles.ManifestResourceName = RoomControllerApp.MainPage
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
 build_metadata.AdditionalFiles.RelativePath = MainPage.xaml
 
+[C:/Users/Suicidal_Kitten/Documents/Projecten/MQTT_Room_Controller/RoomControllerApp/MqttConfig.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = RoomControllerApp.MqttConfig.xaml
+build_metadata.AdditionalFiles.TargetPath = MqttConfig.xaml
+build_metadata.AdditionalFiles.RelativePath = MqttConfig.xaml
+
 [C:/Users/Suicidal_Kitten/Documents/Projecten/MQTT_Room_Controller/RoomControllerApp/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = RoomControllerApp.Resources.Styles.Colors.xaml
