@@ -15,7 +15,7 @@
                 Text="Broker:"
                 SemanticProperties.HeadingLevel="Level1"
                 FontSize="24"/>
-            
+
             <HorizontalStackLayout
                 Spacing="10"
                 Padding="30,0">
@@ -25,7 +25,7 @@
                     SemanticProperties.HeadingLevel="Level2"
                     FontSize="16"/>
                 <Entry
-                    x:Name="IpEntry"
+                    x:Name="ipEntry"
                     Placeholder="192.168.0.1"
                     Text=""
                     Keyboard="Telephone"
@@ -44,7 +44,7 @@
                     SemanticProperties.HeadingLevel="Level2"
                     FontSize="16"/>
                 <Entry
-                    x:Name="PortEntry"
+                    x:Name="portEntry"
                     Placeholder="1883"
                     Text=""
                     Keyboard="Numeric"
@@ -53,6 +53,13 @@
                     WidthRequest="248"/>
 
             </HorizontalStackLayout>
+
+            <Label
+                x:Name="brokerErrorLabel"
+                IsVisible="false"
+                Text=""
+                TextColor="Red"
+                Padding="30,0"/>
 
             <Label 
                 Text="Connection:"
@@ -64,7 +71,7 @@
                 Padding="30,0">
 
                 <Switch
-                    x:Name="TlsSwitch"/>
+                    x:Name="tlsSwitch"/>
                 <Label 
                     Text="Use TLS Encryption"
                     SemanticProperties.HeadingLevel="Level2"
@@ -72,14 +79,13 @@
                     Margin="0,12"/>
 
             </HorizontalStackLayout>
-            
+
             <HorizontalStackLayout
                 Spacing="10"
                 Padding="30,0">
 
                 <Switch
-                    x:Name="CredentialsSwitch"
-                    Toggled="CredentialsSwitch_Toggled"/>
+                    x:Name="credentialsSwitch"/>
                 <Label 
                     Text="Use Credentials"
                     SemanticProperties.HeadingLevel="Level2"
@@ -88,50 +94,60 @@
 
             </HorizontalStackLayout>
 
-            <HorizontalStackLayout
-                x:Name="UsernameLine"
-                Spacing="10"
-                Padding="30,0">
+            <VerticalStackLayout
+                x:Name="credentialsSection"
+                Spacing="10">
+
+                <HorizontalStackLayout
+                    Spacing="10"
+                    Padding="30,0">
 
                 <Label 
-                    Text="Username:"
-                    SemanticProperties.HeadingLevel="Level2"
-                    FontSize="16"/>
+                        Text="Username:"
+                        SemanticProperties.HeadingLevel="Level2"
+                        FontSize="16"/>
                 <Entry
-                    x:Name="UsernameEntry"
-                    Placeholder="username"
-                    Text=""
-                    FontSize="16"
-                    Margin="0,-10"
-                    WidthRequest="200"/>
+                        x:Name="usernameEntry"
+                        Placeholder="username"
+                        Text=""
+                        FontSize="16"
+                        Margin="0,-10"
+                        WidthRequest="200"/>
 
-            </HorizontalStackLayout>
+                </HorizontalStackLayout>
 
-            <HorizontalStackLayout
-                x:Name="PasswordLine"
-                Spacing="10"
-                Padding="30,0">
+                <HorizontalStackLayout
+                    Spacing="10"
+                    Padding="30,0">
 
                 <Label 
-                    Text="Password:"
-                    SemanticProperties.HeadingLevel="Level2"
-                    FontSize="16"/>
+                        Text="Password:"
+                        SemanticProperties.HeadingLevel="Level2"
+                        FontSize="16"/>
                 <Entry
-                    x:Name="PasswordEntry"
-                    Placeholder="password"
-                    Text=""
-                    IsPassword="True"
-                    FontSize="16"
-                    Margin="0,-10"
-                    WidthRequest="205"/>
+                        x:Name="passwordEntry"
+                        Placeholder="password"
+                        Text=""
+                        IsPassword="True"
+                        FontSize="16"
+                        Margin="0,-10"
+                        WidthRequest="205"/>
 
-            </HorizontalStackLayout>
+                </HorizontalStackLayout>
+
+                <Label
+                    x:Name="credentialsErrorLabel"
+                    IsVisible="false"
+                    Text=""
+                    TextColor="Red"
+                    Padding="30,0"/>
+
+            </VerticalStackLayout>
 
             <Button
-                x:Name="SaveButton"
+                x:Name="saveButton"
                 Text="Save Current Configuration"
                 SemanticProperties.Description="A button that saves the current configuration to memory."
-                Clicked="SaveButton_Clicked"
                 Margin="0,20"/>
 
         </VerticalStackLayout>
