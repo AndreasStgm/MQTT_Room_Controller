@@ -2,7 +2,6 @@ using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using MQTTnet;
 using MQTTnet.Client;
-using System.Security.Authentication;
 using System.Text.RegularExpressions;
 
 namespace RoomControllerApp;
@@ -91,6 +90,7 @@ public partial class MqttConfigPage : ContentPage
         Toast.Make(toastMessage, ToastDuration.Short, 14).Show();
     }
 
+    //Checks if the input IP address is correctly formatted using a regular expression
     private bool IsIpWithinRange()
     {
         bool condition = Regex.IsMatch(ipEntry.Text.Trim(), @"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$");
@@ -105,6 +105,7 @@ public partial class MqttConfigPage : ContentPage
         return condition;
     }
 
+    //Checks if the input port is a correct value within the valid TCP port range
     private bool IsPortWithinRange()
     {
         bool condition = portEntry.Text.Trim() != string.Empty;
@@ -142,7 +143,7 @@ public partial class MqttConfigPage : ContentPage
         bool condition = entry.Text.Trim() == string.Empty;
         if (condition)
         {
-            DisplayErrorMessage(credentialsErrorLabel, true, $"{string.Concat(entry.Placeholder.Substring(0, 1).ToUpper(), entry.Placeholder.Substring(1))} cannot be empty when using credentials");
+            DisplayErrorMessage(credentialsErrorLabel, true, $"{string.Concat(entry.Placeholder.Substring(0, 1).ToUpper(), entry.Placeholder.Substring(1))} cannot be empty when using credentials for authentication");
         }
         else
         {
@@ -162,12 +163,12 @@ public partial class MqttConfigPage : ContentPage
                 .WithTcpServer("brokerIP")
                 .WithTls(o =>
                 {
-                    // The used public broker sometimes has invalid certificates. This sample accepts all
-                    // certificates. This should not be used in live environments.
-                    o.CertificateValidationHandler = _ => true;
+                    //    // The used public broker sometimes has invalid certificates. This sample accepts all
+                    //    // certificates. This should not be used in live environments.
+                    //    o.CertificateValidationHandler = _ => true;
 
-                    // The default value is determined by the OS. Set manually to force version.
-                    o.SslProtocol = SslProtocols.Tls12;
+                    //    // The default value is determined by the OS. Set manually to force version.
+                    //    o.SslProtocol = SslProtocols.Tls12;
                 }).Build();
 
             using (var timeout = new CancellationTokenSource(5000))

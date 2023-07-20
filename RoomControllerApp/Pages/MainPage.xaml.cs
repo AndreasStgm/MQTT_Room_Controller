@@ -2,13 +2,13 @@
 
 public partial class MainPage : ContentPage
 {
-	public MainPage()
-	{
-		InitializeComponent();
-	}
+    public MainPage()
+    {
+        InitializeComponent();
+    }
 
     private void FlashButton_Clicked(object sender, EventArgs e)
     {
-		DisplayAlert("Test DisplayAlert", "Cringe", "OK");
+        DisplayAlert("Test DisplayAlert", "Cringe", "OK");
     }
 }
