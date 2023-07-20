@@ -1,6 +1,8 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Core.Platform;
+using RoomControllerApp.HelperClasses;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace RoomControllerApp;
@@ -18,7 +20,30 @@ public partial class MqttConfigPage : ContentPage
         passwordEntry.TextChanged += CredentialEntry_TextChanged;
         saveButton.Clicked += SaveButton_Clicked;
 
-        ToggleCredentialsVisibility(false);
+        string statusMessage;
+        try
+        {
+            MqttConfigHelper initialConfig = MqttConfigHelper.ReadConfigFromFile().Result;
+
+            Debug.WriteLine(initialConfig);
+
+            ipEntry.Text = initialConfig.BrokerIp;
+            portEntry.Text = Convert.ToString(initialConfig.Port);
+            tlsSwitch.IsToggled = initialConfig.IsTlsEnabled;
+            credentialsSwitch.IsToggled = initialConfig.IsCredentialsEnabled;
+            ToggleCredentialsVisibility(initialConfig.IsCredentialsEnabled);
+            usernameEntry.Text = initialConfig.Username;
+            passwordEntry.Text = initialConfig.Password;
+
+            statusMessage = "Previous configuration loaded";
+        }
+        catch (Exception)
+        {
+            ToggleCredentialsVisibility(false);
+            statusMessage = "No previous config found";
+        }
+
+        Toast.Make(statusMessage, ToastDuration.Short).Show();
     }
 
     private void IpEntry_TextChanged(object sender, TextChangedEventArgs e)
@@ -55,42 +80,62 @@ public partial class MqttConfigPage : ContentPage
         UnfocusChildElements(credentialsSection);
         ipEntry.HideKeyboardAsync(CancellationToken.None); //Apparently hiding the keyboard for one entry that isn't even in focus hides the keyboard successfully
 
-        string toastMessage = string.Empty;
+        string statusMessage;
+        MqttConfigHelper config;
 
         if (!IsIpWithinRange())
         {
-            toastMessage = "Incorrect IP configuration";
+            statusMessage = "Incorrect IP configuration";
             ipEntry.Focus();
         }
         else if (!IsPortWithinRange())
         {
-            toastMessage = "Incorrect port configuration";
+            statusMessage = "Incorrect port configuration";
             portEntry.Focus();
         }
         else if (credentialsSwitch.IsToggled)
         {
             if (IsCredentialEmpty(usernameEntry))
             {
-                toastMessage = "Incorrect username configuration";
+                statusMessage = "Incorrect username configuration";
                 usernameEntry.Focus();
             }
             else if (IsCredentialEmpty(passwordEntry))
             {
                 passwordEntry.Focus();
-                toastMessage = "Incorrect password configuration";
+                statusMessage = "Incorrect password configuration";
             }
             else
             {
-                toastMessage = "Configuration Saved";
                 DisplayErrorMessage(credentialsErrorLabel, false, string.Empty);
+
+                config = new MqttConfigHelper(
+                    ipEntry.Text.Trim(),
+                    Convert.ToInt32(portEntry.Text.Trim()),
+                    tlsSwitch.IsToggled,
+                    credentialsSwitch.IsToggled,
+                    usernameEntry.Text.Trim(),
+                    passwordEntry.Text.Trim());
+
+                config.WriteConfigToFile(); //TODO: configure result to reflect success and check result
+
+                statusMessage = "Configuration saved";
             }
         }
         else
         {
-            toastMessage = "Configuration Saved";
+            config = new MqttConfigHelper(
+                    ipEntry.Text.Trim(),
+                    Convert.ToInt32(portEntry.Text.Trim()),
+                    tlsSwitch.IsToggled,
+                    credentialsSwitch.IsToggled);
+
+            config.WriteConfigToFile(); //TODO: configure result to reflect success and check result
+
+            statusMessage = "Configuration saved";
         }
         //Display a confirmation message to make it more user-friendly
-        Toast.Make(toastMessage, ToastDuration.Short, 14).Show();
+        Toast.Make(statusMessage, ToastDuration.Short).Show();
     }
 
     //Checks if the input IP address is correctly formatted using a regular expression
