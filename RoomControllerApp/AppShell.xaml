@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="RoomControllerApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:RoomControllerApp"
+    Shell.FlyoutBehavior="Flyout">
+
+    <FlyoutItem Title="Home"
+                Icon="{AppThemeBinding Light=icon_home_light.png, Dark=icon_home_dark.png}">
+        <Tab>
+            <ShellContent
+                Title="Home"
+                ContentTemplate="{DataTemplate local:MainPage}"/>
+        </Tab>
+    </FlyoutItem>
+
+    <FlyoutItem Title="MQTT Config"
+                Icon="{AppThemeBinding Light=icon_wireless_light.png, Dark=icon_wireless_dark.png}">
+        <Tab>
+            <ShellContent
+                Title="MQTT Config"
+                ContentTemplate="{DataTemplate local:MqttConfig}"/>
+        </Tab>
+    </FlyoutItem>
+
+    
+
+</Shell>
