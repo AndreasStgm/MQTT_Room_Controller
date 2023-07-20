@@ -1,7 +1,6 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
-using MQTTnet;
-using MQTTnet.Client;
+using CommunityToolkit.Maui.Core.Platform;
 using System.Text.RegularExpressions;
 
 namespace RoomControllerApp;
@@ -52,6 +51,10 @@ public partial class MqttConfigPage : ContentPage
 
     private void SaveButton_Clicked(object sender, EventArgs e)
     {
+        UnfocusChildElements(fullPage);
+        UnfocusChildElements(credentialsSection);
+        ipEntry.HideKeyboardAsync(CancellationToken.None); //Apparently hiding the keyboard for one entry that isn't even in focus hides the keyboard successfully
+
         string toastMessage = string.Empty;
 
         if (!IsIpWithinRange())
@@ -152,30 +155,20 @@ public partial class MqttConfigPage : ContentPage
         return condition;
     }
 
-    private async void CreateClient()
+    //A very ugly, but functioning way to unfocus all entry elements on the page
+    private void UnfocusChildElements(VerticalStackLayout layoutPiece)
     {
-        var mqttFactory = new MqttFactory();
-
-        using (var mqttClient = mqttFactory.CreateMqttClient())
+        foreach (var item in layoutPiece.Children)
         {
-            var mqttClientOptions = new MqttClientOptionsBuilder()
-                .WithCredentials("username", "password")
-                .WithTcpServer("brokerIP")
-                .WithTls(o =>
-                {
-                    //    // The used public broker sometimes has invalid certificates. This sample accepts all
-                    //    // certificates. This should not be used in live environments.
-                    //    o.CertificateValidationHandler = _ => true;
-
-                    //    // The default value is determined by the OS. Set manually to force version.
-                    //    o.SslProtocol = SslProtocols.Tls12;
-                }).Build();
-
-            using (var timeout = new CancellationTokenSource(5000))
+            if (item.GetType() == typeof(HorizontalStackLayout))
             {
-                await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
-
-                Console.WriteLine("The MQTT client is connected.");
+                foreach (var childItem in ((HorizontalStackLayout)item).Children)
+                {
+                    if (childItem.GetType() == typeof(Entry))
+                    {
+                        childItem.Unfocus();
+                    }
+                }
             }
         }
     }
