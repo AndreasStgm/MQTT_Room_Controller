@@ -7,9 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace RoomControllerApp;
 
-public partial class MqttConfig : ContentPage
+public partial class MqttConfigPage : ContentPage
 {
-    public MqttConfig()
+    public MqttConfigPage()
     {
         InitializeComponent();
 
