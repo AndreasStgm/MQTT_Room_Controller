@@ -2,7 +2,6 @@ using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Core.Platform;
 using RoomControllerApp.HelperClasses;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace RoomControllerApp;
@@ -23,9 +22,7 @@ public partial class MqttConfigPage : ContentPage
         string statusMessage;
         try
         {
-            MqttConfigHelper initialConfig = MqttConfigHelper.ReadConfigFromFile().Result;
-
-            Debug.WriteLine(initialConfig);
+            MqttConfigHelper initialConfig = MqttConfigHelper.ReadConfigFromFile();
 
             ipEntry.Text = initialConfig.BrokerIp;
             portEntry.Text = Convert.ToString(initialConfig.Port);

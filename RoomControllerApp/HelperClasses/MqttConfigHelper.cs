@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace RoomControllerApp.HelperClasses
@@ -8,12 +7,12 @@ namespace RoomControllerApp.HelperClasses
     {
         private static string CONFIG_LOCATION = Path.Combine(FileSystem.Current.CacheDirectory, "mqtt_config.json");
 
-        public string BrokerIp { get; private set; }
-        public int Port { get; private set; }
-        public bool IsTlsEnabled { get; private set; }
-        public bool IsCredentialsEnabled { get; private set; }
-        public string Username { get; private set; }
-        public string Password { get; private set; }
+        public string BrokerIp { get; set; }
+        public int Port { get; set; }
+        public bool IsTlsEnabled { get; set; }
+        public bool IsCredentialsEnabled { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
 
         public MqttConfigHelper(string brokerIp, int port, bool isTlsEnabled, bool isCredentialsEnabled, string username, string password)
         {
@@ -44,17 +43,13 @@ namespace RoomControllerApp.HelperClasses
             return true;
         }
 
-        public static async Task<MqttConfigHelper> ReadConfigFromFile() //TODO: configure result to reflect success and check result
+        public static MqttConfigHelper ReadConfigFromFile() //TODO: configure result to reflect success and check result
         {
             using (StreamReader reader = File.OpenText(CONFIG_LOCATION))
             {
                 string jsonString = reader.ReadToEnd();
 
-                Debug.WriteLine(jsonString);
-
-                MqttConfigHelper config = JsonSerializer.Deserialize<MqttConfigHelper>(jsonString);
-
-                return config;
+                return JsonSerializer.Deserialize<MqttConfigHelper>(jsonString);
             }
         }
 
