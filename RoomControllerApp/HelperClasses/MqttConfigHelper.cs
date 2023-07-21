@@ -43,7 +43,7 @@ namespace RoomControllerApp.HelperClasses
             return true;
         }
 
-        public static MqttConfigHelper ReadConfigFromFile() //TODO: configure result to reflect success and check result
+        public static MqttConfigHelper ReadConfigFromFile() //TODO: Deserialisation causes stutter when loading window -> maybe fix with asynchronous behaviour?
         {
             using (StreamReader reader = File.OpenText(CONFIG_LOCATION))
             {
