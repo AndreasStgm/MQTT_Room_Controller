@@ -161,7 +161,7 @@ public partial class MqttConfigPage : ContentPage
 
     private async void ConnectButton_Clicked(object sender, EventArgs e)
     {
-        await MqttClientHelper.AttemptConnectClient();
+        await MqttClientHelper.AttemptConnectClient(10);
         MqttClientHelper.SetConnectionLabel(connectionLabel);
     }
 

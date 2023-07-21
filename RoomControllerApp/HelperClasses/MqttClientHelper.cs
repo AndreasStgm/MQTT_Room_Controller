@@ -9,49 +9,53 @@ namespace RoomControllerApp.HelperClasses
     public static class MqttClientHelper
     {
         static public MqttConfigHelper Config { get; set; }
-        static public MqttClient Client { get; private set; }
+        static public IMqttClient Client { get; private set; }
         static public bool IsConnected { get; private set; }
 
-        static public async Task AttemptConnectClient()
+        static public async Task AttemptConnectClient(int cancellationTimoutDuration)
         {
             var mqttFactory = new MqttFactory();
 
-            using (var mqttClient = mqttFactory.CreateMqttClient())
+            Client = mqttFactory.CreateMqttClient();
+
+            var mqttClientOptionsBuilder = new MqttClientOptionsBuilder()
+                .WithTcpServer(Config.BrokerIp, Config.Port)
+                .WithProtocolVersion(MqttProtocolVersion.V500)
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(60));
+
+            if (Config.IsTlsEnabled)
             {
-                var mqttClientOptionsBuilder = new MqttClientOptionsBuilder()
-                    .WithTcpServer(Config.BrokerIp, Config.Port)
-                    .WithProtocolVersion(MqttProtocolVersion.V500)
-                    .WithKeepAlivePeriod(TimeSpan.FromSeconds(60));
+                mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithTls();
+            }
+            if (Config.IsCredentialsEnabled)
+            {
+                mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithCredentials(Config.Username, Config.Password);
+            }
+            var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
 
-                if (Config.IsTlsEnabled)
+            using (var timeout = new CancellationTokenSource(10000))
+            {
+                try
                 {
-                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithTls();
+                    var response = await Client.ConnectAsync(mqttClientOptionsTest, timeout.Token);
+
+                    IsConnected = true;
+                    Debug.WriteLine("Connected Successfully");
                 }
-                if (Config.IsCredentialsEnabled)
+                catch (MqttCommunicationException e)
                 {
-                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithCredentials(Config.Username, Config.Password);
+                    Debug.WriteLine(e.Message);
                 }
-                var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
-
-                using (var timeout = new CancellationTokenSource(10000))
+                catch (OperationCanceledException e)
                 {
-                    try
-                    {
-                        var response = await mqttClient.ConnectAsync(mqttClientOptionsTest, timeout.Token);
-
-                        IsConnected = true;
-                        Debug.WriteLine("Connected Successfully");
-                    }
-                    catch (MqttCommunicationException e)
-                    {
-                        Debug.WriteLine(e.Message);
-                    }
-                    catch (OperationCanceledException e)
-                    {
-                        Debug.WriteLine(e.Message);
-                    }
+                    Debug.WriteLine(e.Message);
                 }
             }
+        }
+
+        static public async Task AttemptDisconnectClient()
+        {
+
         }
 
         static public bool SetConnectionLabel(Label displayLabel)
