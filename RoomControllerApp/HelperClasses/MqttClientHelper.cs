@@ -14,46 +14,53 @@ namespace RoomControllerApp.HelperClasses
 
         static public async Task AttemptConnectClient(int cancellationTimoutDuration)
         {
-            var mqttFactory = new MqttFactory();
+            if (Client == null && !IsConnected)
+            {
+                var mqttFactory = new MqttFactory();
 
-            Client = mqttFactory.CreateMqttClient();
+                Client = mqttFactory.CreateMqttClient();
 
-            var mqttClientOptionsBuilder = new MqttClientOptionsBuilder()
+                var mqttClientOptionsBuilder = new MqttClientOptionsBuilder()
                 .WithTcpServer(Config.BrokerIp, Config.Port)
                 .WithProtocolVersion(MqttProtocolVersion.V500)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(60));
 
-            if (Config.IsTlsEnabled)
-            {
-                mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithTls();
-            }
-            if (Config.IsCredentialsEnabled)
-            {
-                mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithCredentials(Config.Username, Config.Password);
-            }
-            var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
+                if (Config.IsTlsEnabled)
+                {
+                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithTls();
+                }
+                if (Config.IsCredentialsEnabled)
+                {
+                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithCredentials(Config.Username, Config.Password);
+                }
+                var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
 
-            using (var timeout = new CancellationTokenSource(10000))
-            {
-                try
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTimoutDuration)))
                 {
-                    var response = await Client.ConnectAsync(mqttClientOptionsTest, timeout.Token);
+                    try
+                    {
+                        var response = await Client.ConnectAsync(mqttClientOptionsTest, timeout.Token);
 
-                    IsConnected = true;
-                    Debug.WriteLine("Connected Successfully");
+                        IsConnected = true;
+                        Debug.WriteLine("Connected Successfully");
+                    }
+                    catch (MqttCommunicationException e)
+                    {
+                        Debug.WriteLine(e.Message);
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        Debug.WriteLine(e.Message);
+                    }
                 }
-                catch (MqttCommunicationException e)
-                {
-                    Debug.WriteLine(e.Message);
-                }
-                catch (OperationCanceledException e)
-                {
-                    Debug.WriteLine(e.Message);
-                }
+            }
+            else
+            {
+                Debug.WriteLine("Already connected");
             }
         }
 
-        static public async Task AttemptDisconnectClient()
+        static public async Task AttemptDisconnectClient(int cancellationTimoutDuration)
         {
 
         }
