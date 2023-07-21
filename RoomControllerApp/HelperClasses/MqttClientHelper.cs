@@ -1,6 +1,7 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
+using MQTTnet.Formatter;
 using System.Diagnostics;
 
 namespace RoomControllerApp.HelperClasses
@@ -17,7 +18,10 @@ namespace RoomControllerApp.HelperClasses
 
             using (var mqttClient = mqttFactory.CreateMqttClient())
             {
-                var mqttClientOptionsBuilder = new MqttClientOptionsBuilder().WithTcpServer(Config.BrokerIp, Config.Port);
+                var mqttClientOptionsBuilder = new MqttClientOptionsBuilder()
+                    .WithTcpServer(Config.BrokerIp, Config.Port)
+                    .WithProtocolVersion(MqttProtocolVersion.V500)
+                    .WithKeepAlivePeriod(TimeSpan.FromSeconds(60));
 
                 if (Config.IsTlsEnabled)
                 {
@@ -29,7 +33,7 @@ namespace RoomControllerApp.HelperClasses
                 }
                 var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
 
-                using (var timeout = new CancellationTokenSource(5000))
+                using (var timeout = new CancellationTokenSource(10000))
                 {
                     try
                     {
@@ -40,7 +44,6 @@ namespace RoomControllerApp.HelperClasses
                     }
                     catch (MqttCommunicationException e)
                     {
-
                         Debug.WriteLine(e.Message);
                     }
                     catch (OperationCanceledException e)
