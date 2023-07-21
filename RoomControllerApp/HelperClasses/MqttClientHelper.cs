@@ -1,10 +1,13 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Exceptions;
+using System.Diagnostics;
 
 namespace RoomControllerApp.HelperClasses
 {
     public static class MqttClientHelper
     {
+        static public MqttConfigHelper Config { get; set; }
         static public MqttClient Client { get; private set; }
         static public bool IsConnected { get; private set; }
 
@@ -14,26 +17,56 @@ namespace RoomControllerApp.HelperClasses
 
             using (var mqttClient = mqttFactory.CreateMqttClient())
             {
-                var mqttClientOptions = new MqttClientOptionsBuilder()
-                    .WithCredentials("username", "password")
-                    .WithTcpServer("brokerIP")
-                    .WithTls(o =>
-                    {
-                        //    // The used public broker sometimes has invalid certificates. This sample accepts all
-                        //    // certificates. This should not be used in live environments.
-                        //    o.CertificateValidationHandler = _ => true;
+                var mqttClientOptionsBuilder = new MqttClientOptionsBuilder().WithTcpServer(Config.BrokerIp, Config.Port);
 
-                        //    // The default value is determined by the OS. Set manually to force version.
-                        //    o.SslProtocol = SslProtocols.Tls12;
-                    }).Build();
+                if (Config.IsTlsEnabled)
+                {
+                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithTls();
+                }
+                if (Config.IsCredentialsEnabled)
+                {
+                    mqttClientOptionsBuilder = mqttClientOptionsBuilder.WithCredentials(Config.Username, Config.Password);
+                }
+                var mqttClientOptionsTest = mqttClientOptionsBuilder.Build();
 
                 using (var timeout = new CancellationTokenSource(5000))
                 {
-                    await mqttClient.ConnectAsync(mqttClientOptions, timeout.Token);
+                    try
+                    {
+                        var response = await mqttClient.ConnectAsync(mqttClientOptionsTest, timeout.Token);
 
-                    Console.WriteLine("The MQTT client is connected.");
+                        IsConnected = true;
+                        Debug.WriteLine("Connected Successfully");
+                    }
+                    catch (MqttCommunicationException e)
+                    {
+
+                        Debug.WriteLine(e.Message);
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        Debug.WriteLine(e.Message);
+                    }
                 }
             }
+        }
+
+        static public bool SetConnectionLabel(Label displayLabel)
+        {
+            string displayText;
+            if (IsConnected)
+            {
+                displayText = "Connected";
+                displayLabel.TextColor = Colors.LimeGreen;
+            }
+            else
+            {
+                displayText = "Disconnected";
+                displayLabel.TextColor = Colors.Red;
+            }
+            displayLabel.Text = displayText;
+
+            return IsConnected;
         }
     }
 }

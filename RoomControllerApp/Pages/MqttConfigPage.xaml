@@ -154,6 +154,20 @@
                 SemanticProperties.Description="A button that saves the current configuration to memory."
                 Margin="0,20"/>
 
+            <Button
+                x:Name="connectButton"
+                IsEnabled="False"
+                Text="Connect To Broker"
+                SemanticProperties.Description="A button that attempts to connect to the broker with the current configuration."
+                Margin="0,20"/>
+
+            <Label
+                x:Name="connectionLabel"
+                Text="Disconnected"
+                FontSize="16"
+                TextColor="Red"
+                HorizontalOptions="Center"/>
+
         </VerticalStackLayout>
     </ScrollView>
     

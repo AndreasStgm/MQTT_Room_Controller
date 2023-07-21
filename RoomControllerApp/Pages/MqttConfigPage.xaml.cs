@@ -14,15 +14,18 @@ public partial class MqttConfigPage : ContentPage
 
         ipEntry.TextChanged += IpEntry_TextChanged;
         portEntry.TextChanged += PortEntry_TextChanged;
+        tlsSwitch.Toggled += TlsSwitch_Toggled;
         credentialsSwitch.Toggled += CredentialsSwitch_Toggled;
         usernameEntry.TextChanged += CredentialEntry_TextChanged;
         passwordEntry.TextChanged += CredentialEntry_TextChanged;
         saveButton.Clicked += SaveButton_Clicked;
+        connectButton.Clicked += ConnectButton_Clicked;
 
-        string statusMessage;
+        string statusMessage; //TODO: Deserialisation causes stutter when loading window -> maybe fix with asynchronous behaviour?
         try
         {
             MqttConfigHelper initialConfig = MqttConfigHelper.ReadConfigFromFile();
+            MqttClientHelper.Config = initialConfig;
 
             ipEntry.Text = initialConfig.BrokerIp;
             portEntry.Text = Convert.ToString(initialConfig.Port);
@@ -32,29 +35,44 @@ public partial class MqttConfigPage : ContentPage
             usernameEntry.Text = initialConfig.Username;
             passwordEntry.Text = initialConfig.Password;
 
+            connectButton.IsEnabled = true;
             statusMessage = "Previous configuration loaded";
         }
         catch (Exception)
         {
             ToggleCredentialsVisibility(false);
+            connectButton.IsEnabled = false;
             statusMessage = "No previous config found";
         }
 
         Toast.Make(statusMessage, ToastDuration.Short).Show();
+
+        MqttClientHelper.SetConnectionLabel(connectionLabel);
     }
 
     private void IpEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
+        ConfigurationChanged();
+
         IsIpWithinRange();
     }
 
     private void PortEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
+        ConfigurationChanged();
+
         IsPortWithinRange();
+    }
+
+    private void TlsSwitch_Toggled(object sender, ToggledEventArgs e)
+    {
+        ConfigurationChanged();
     }
 
     private void CredentialsSwitch_Toggled(object sender, ToggledEventArgs e)
     {
+        ConfigurationChanged();
+
         if (credentialsSwitch.IsToggled)
         {
             ToggleCredentialsVisibility(true);
@@ -67,6 +85,8 @@ public partial class MqttConfigPage : ContentPage
 
     private void CredentialEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
+        ConfigurationChanged();
+
         Entry entry = (Entry)sender;
         IsCredentialEmpty(entry);
     }
@@ -116,6 +136,8 @@ public partial class MqttConfigPage : ContentPage
 
                 config.WriteConfigToFile(); //TODO: configure result to reflect success and check result
 
+                connectButton.IsEnabled = true;
+                MqttClientHelper.Config = config;
                 statusMessage = "Configuration saved";
             }
         }
@@ -129,10 +151,18 @@ public partial class MqttConfigPage : ContentPage
 
             config.WriteConfigToFile(); //TODO: configure result to reflect success and check result
 
+            connectButton.IsEnabled = true;
+            MqttClientHelper.Config = config;
             statusMessage = "Configuration saved";
         }
         //Display a confirmation message to make it more user-friendly
         Toast.Make(statusMessage, ToastDuration.Short).Show();
+    }
+
+    private async void ConnectButton_Clicked(object sender, EventArgs e)
+    {
+        await MqttClientHelper.AttemptConnectClient();
+        MqttClientHelper.SetConnectionLabel(connectionLabel);
     }
 
     //Checks if the input IP address is correctly formatted using a regular expression
@@ -213,5 +243,14 @@ public partial class MqttConfigPage : ContentPage
                 }
             }
         }
+    }
+
+    private void ConfigurationChanged()
+    {
+        connectButton.IsEnabled = false;
+
+        //Disconnect from the broker
+
+        MqttClientHelper.SetConnectionLabel(connectionLabel);
     }
 }
