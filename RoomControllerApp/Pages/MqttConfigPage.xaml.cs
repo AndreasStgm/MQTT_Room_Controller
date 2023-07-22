@@ -47,7 +47,7 @@ public partial class MqttConfigPage : ContentPage
 
         Toast.Make(statusMessage, ToastDuration.Short).Show();
 
-        MqttClientHelper.SetConnectionLabel(connectionLabel);
+        MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
     }
 
     private void IpEntry_TextChanged(object sender, TextChangedEventArgs e)
@@ -161,8 +161,19 @@ public partial class MqttConfigPage : ContentPage
 
     private async void ConnectButton_Clicked(object sender, EventArgs e)
     {
-        await MqttClientHelper.AttemptConnectClient(10);
-        MqttClientHelper.SetConnectionLabel(connectionLabel);
+        string result;
+        if (!MqttClientHelper.IsConnected)
+        {
+            result = await MqttClientHelper.AttemptBuildAndConnectClient(10);
+        }
+        else
+        {
+            result = await MqttClientHelper.AttemptDisconnectClient(10);
+        }
+
+        MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
+
+        Toast.Make(result, ToastDuration.Long).Show();
     }
 
     //Checks if the input IP address is correctly formatted using a regular expression
@@ -245,12 +256,17 @@ public partial class MqttConfigPage : ContentPage
         }
     }
 
-    private void ConfigurationChanged()
+    private async void ConfigurationChanged()
     {
         connectButton.IsEnabled = false;
 
-        //Disconnect from the broker
+        if (MqttClientHelper.IsConnected)
+        {
+            await MqttClientHelper.AttemptDisconnectClient(10);
 
-        MqttClientHelper.SetConnectionLabel(connectionLabel);
+            Toast.Make("Disconnected due to configuration change").Show();
+        }
+
+        MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
     }
 }
