@@ -5,13 +5,18 @@
 // Credentials left out for obvious security reasons
 WiFiClient wifiClient;
 const char ssid[] = "ssid";
-const char pass[] = "secret";
+const char pass[] = "pass";
 
 PubSubClient mqttClient(wifiClient);
-const char brokerIp[] = "ip";
+const char brokerIp[] = "192.168.0.182";
 const int brokerPort = 1883;
-const char brokerUser[] = "user";
+const char brokerUser[] = "andreas";
 const char brokerPass[] = "pass";
+
+// For initial communication test
+const char testTopic[] = "flashTest";
+const String testMessage = "FLASH";
+const int ledPin = 2;
 
 // ===== Function Declarations =====
 
@@ -21,6 +26,9 @@ void connectToMqttBroker();
 void setup()
 {
   Serial.begin(9600);
+
+  // For initial communication test
+  pinMode(ledPin, OUTPUT);
 
   // WiFi config and start
   Serial.printf("Attempting to connect to WiFi network: %s.\n", ssid);
@@ -56,6 +64,34 @@ void loop()
 void messageCallback(char *topic, byte *payload, unsigned int length)
 {
   Serial.printf("Message received on topic: %s with length %d.\n", topic, length);
+
+  String receivedTopic(topic);
+  String message("X", length);
+  for (unsigned int i = 0; i < length; i++)
+  {
+    message.setCharAt(i, (char)payload[i]);
+  }
+
+  if (receivedTopic == String(testTopic))
+  {
+    Serial.println("Correct topic");
+    digitalWrite(ledPin, HIGH);
+    delay(200);
+    digitalWrite(ledPin, LOW);
+    delay(200);
+
+    if (message == testMessage)
+    {
+      Serial.println("Correct payload");
+      digitalWrite(ledPin, HIGH);
+      delay(200);
+      digitalWrite(ledPin, LOW);
+    }
+    else
+    {
+      Serial.println("Unknown payload.");
+    }
+  }
 }
 
 void connectToMqttBroker()
@@ -69,6 +105,7 @@ void connectToMqttBroker()
       Serial.println("Connected to MQTT broker.");
 
       // Subscribe to topics
+      mqttClient.subscribe(testTopic);
     }
     else
     {
