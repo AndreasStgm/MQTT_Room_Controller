@@ -8,9 +8,11 @@ namespace RoomControllerApp;
 
 public partial class MqttConfigPage : ContentPage
 {
+    private bool initialLoad;
+
     public MqttConfigPage()
     {
-        InitializeComponent();
+        InitializeComponent(); //TODO: Stutter when loading window -> maybe fix with asynchronous behaviour?
 
         ipEntry.TextChanged += IpEntry_TextChanged;
         portEntry.TextChanged += PortEntry_TextChanged;
@@ -21,31 +23,31 @@ public partial class MqttConfigPage : ContentPage
         saveButton.Clicked += SaveButton_Clicked;
         connectButton.Clicked += ConnectButton_Clicked;
 
-        string statusMessage; //TODO: Deserialisation causes stutter when loading window -> maybe fix with asynchronous behaviour?
-        try
-        {
-            MqttConfigHelper initialConfig = MqttConfigHelper.ReadConfigFromFile();
-            MqttClientHelper.Config = initialConfig;
+        initialLoad = true;
 
-            ipEntry.Text = initialConfig.BrokerIp;
-            portEntry.Text = Convert.ToString(initialConfig.Port);
-            tlsSwitch.IsToggled = initialConfig.IsTlsEnabled;
-            credentialsSwitch.IsToggled = initialConfig.IsCredentialsEnabled;
-            ToggleCredentialsVisibility(initialConfig.IsCredentialsEnabled);
-            usernameEntry.Text = initialConfig.Username;
-            passwordEntry.Text = initialConfig.Password;
+        string statusMessage;
+        if (MqttClientHelper.Config != null)
+        {
+            ipEntry.Text = MqttClientHelper.Config.BrokerIp;
+            portEntry.Text = Convert.ToString(MqttClientHelper.Config.Port);
+            tlsSwitch.IsToggled = MqttClientHelper.Config.IsTlsEnabled;
+            credentialsSwitch.IsToggled = MqttClientHelper.Config.IsCredentialsEnabled;
+            ToggleCredentialsVisibility(MqttClientHelper.Config.IsCredentialsEnabled);
+            usernameEntry.Text = MqttClientHelper.Config.Username;
+            passwordEntry.Text = MqttClientHelper.Config.Password;
 
             connectButton.IsEnabled = true;
             statusMessage = "Previous configuration loaded";
         }
-        catch (Exception)
+        else
         {
             ToggleCredentialsVisibility(false);
             connectButton.IsEnabled = false;
             statusMessage = "No previous config found";
         }
-
         Toast.Make(statusMessage, ToastDuration.Short).Show();
+
+        initialLoad = false;
 
         MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
     }
@@ -93,6 +95,8 @@ public partial class MqttConfigPage : ContentPage
 
     private void SaveButton_Clicked(object sender, EventArgs e)
     {
+        ConfigurationChanged();
+
         UnfocusChildElements(fullPage);
         UnfocusChildElements(credentialsSection);
         ipEntry.HideKeyboardAsync(CancellationToken.None); //Apparently hiding the keyboard for one entry that isn't even in focus hides the keyboard successfully
@@ -258,15 +262,18 @@ public partial class MqttConfigPage : ContentPage
 
     private async void ConfigurationChanged()
     {
-        connectButton.IsEnabled = false;
-
-        if (MqttClientHelper.IsConnected)
+        if (!initialLoad)
         {
-            await MqttClientHelper.AttemptDisconnectClient(10);
+            connectButton.IsEnabled = false;
 
-            Toast.Make("Disconnected due to configuration change").Show();
+            if (MqttClientHelper.IsConnected)
+            {
+                await MqttClientHelper.AttemptDisconnectClient(10);
+
+                Toast.Make("Disconnected due to configuration change").Show();
+            }
+
+            MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
         }
-
-        MqttClientHelper.SetConnectionLabelAndButton(connectionLabel, connectButton);
     }
 }
